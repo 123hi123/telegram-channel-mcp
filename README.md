@@ -149,28 +149,6 @@ Server-Sent Events连接端点，用于与MCP客户端建立实时通信
 ### `/mcp`
 标准MCP协议端点
 
-## 🧪 开发命令
-
-```bash
-# 启动本地开发服务器
-pnpm run dev
-
-# 代码格式化
-pnpm run format
-
-# 代码检查和自动修复
-pnpm run lint:fix
-
-# 类型检查
-pnpm run type-check
-
-# 生成Cloudflare类型定义
-pnpm run cf-typegen
-
-# 部署到Cloudflare Workers
-pnpm run deploy
-```
-
 ## 📝 自定义开发
 
 ### 添加新的MCP工具
