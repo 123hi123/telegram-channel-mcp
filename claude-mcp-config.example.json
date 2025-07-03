@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "telegram-channel": {
+      "command": "npx",
+      "args": [
+        "mcp-remote",
+        "https://your-worker-name.your-account.workers.dev/sse?key=YOUR_ACCESS_KEY_HERE"
+      ]
+    }
+  }
+} 

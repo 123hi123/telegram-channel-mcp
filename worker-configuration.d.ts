@@ -5,6 +5,7 @@ declare namespace Cloudflare {
 	interface Env {
 		CHANNEL_ID: string;
 		BOT_TOKEN: string;
+		MCP_ACCESS_KEY?: string;
 		MCP_OBJECT: DurableObjectNamespace<import("./src/index").ChannelMCP>;
 	}
 }

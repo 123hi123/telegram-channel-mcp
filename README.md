@@ -1,107 +1,234 @@
-# Telegram频道MCP服务器
+# Telegram頻道MCP服務器
 
-这是一个基于Cloudflare Workers的MCP (Model Context Protocol) 服务器，用于向Telegram频道发送消息。该服务器提供了一个标准化的接口，可以通过MCP协议与AI助手（如Claude Desktop）集成，实现自动化的Telegram频道消息发送功能。
+這是一個基於Cloudflare Workers的MCP (Model Context Protocol) 服務器，用於向Telegram頻道發送消息。該服務器提供了一個標準化的接口，可以通過MCP協議與AI助手（如Claude Desktop）集成，實現自動化的Telegram頻道消息發送功能。
 
-## ✨ 项目特点
+## ✨ 項目特點
 
-- 🚀 **基于Cloudflare Workers** - 全球分布式边缘计算，低延迟高性能
-- 🤖 **MCP协议支持** - 与Claude Desktop等AI助手无缝集成
-- 📱 **Telegram Bot集成** - 通过Telegram Bot API发送消息到指定频道
-- 🛡️ **TypeScript开发** - 完整的类型安全保障
-- ⚡ **实时通信** - 支持SSE (Server-Sent Events) 连接
+- 🚀 **基於Cloudflare Workers** - 全球分布式邊緣計算，低延遲高性能
+- 🤖 **MCP協議支援** - 與Claude Desktop等AI助手無縫集成
+- 📱 **Telegram Bot集成** - 通過Telegram Bot API發送消息到指定頻道
+- 🛡️ **TypeScript開發** - 完整的類型安全保障
+- ⚡ **實時通信** - 支援SSE (Server-Sent Events) 連接
+- 🔐 **安全認證** - 可選的API密鑰保護機制
 
-## 🖼️ 图片展示
+## 🖼️ 圖片展示
 
-![示例图片1](./assets/example1.png)
+![示例圖片1](./assets/example1.png)
 
-![示例图片2](./assets/example2.png)
+![示例圖片2](./assets/example2.png)
 
 ## 🎯 主要功能
 
 ### 工具列表
 
-#### `send-message-to-channel`
-向配置的Telegram频道发送消息
+#### `send-sms`
+向配置的Telegram聊天或頻道發送消息
 
-**参数:**
-- `message` (string): 要发送的消息内容，支持MarkdownV2格式
+**參數:**
+- `message` (string): 要發送的消息內容
+- `parse_mode` (可選): 消息解析模式
+  - `"none"` - 純文本（默認）
+  - `"Markdown"` - Markdown格式
+  - `"MarkdownV2"` - MarkdownV2格式（自動轉義特殊字符）
+  - `"HTML"` - HTML格式
 
 **功能:**
-- 自动发送消息到指定的Telegram频道
-- 支持Markdown格式化
-- 返回发送状态确认
+- 自動發送消息到指定的Telegram聊天或頻道
+- 支援多種格式化選項
+- 自動處理MarkdownV2特殊字符轉義
+- 返回詳細的發送狀態確認
 
-## 🚀 快速开始
+## 🚀 快速開始
 
 ### 前置要求
 
-1. **Cloudflare账户** - 用于部署Workers
-2. **Telegram Bot** - 需要创建Bot并获取Token
-3. **Telegram频道** - 需要将Bot添加为频道管理员
-4. **Node.js** - 本地开发环境
+1. **Cloudflare帳戶** - 用於部署Workers
+2. **Node.js 18+** - 本地開發環境
+3. **pnpm** - 包管理器（推薦）
+4. **Telegram Bot** - 需要創建Bot並獲取Token
+5. **Telegram頻道或聊天** - 目標發送位置
 
-### 一键部署
-
-[![部署到Cloudflare Workers](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/cloudflare/ai/tree/main/demos/remote-mcp-authless)
-
-部署完成后，你的MCP服务器将在类似 `telegram-channel-mcp.<your-account>.workers.dev/sse` 的URL上运行。
-
-### 本地开发
+### 📥 項目設置
 
 ```bash
-# 进入项目目录
+# 克隆項目（如果從GitHub獲取）
+git clone <your-repo-url>
 cd telegram-channel-mcp
 
-# 安装依赖
+# 安裝依賴
 pnpm install
 
-# 配置环境变量
+# 複製環境變數模板
 cp .dev.example.vars .dev.vars
 ```
 
-### 环境变量配置
+### 🤖 Telegram Bot 設置
 
-在 `.dev.vars` 文件中配置以下环境变量：
+#### 1. 創建Telegram Bot
+
+1. 在Telegram中聯繫 [@BotFather](https://t.me/BotFather)
+2. 發送 `/newbot` 創建新Bot
+3. 按提示設置Bot名稱和用戶名
+4. **保存獲得的Bot Token**（格式：`123456789:ABCdef123...`）
+
+#### 2. 獲取目標ID
+
+**對於頻道：**
+1. 創建Telegram頻道
+2. 將Bot添加為頻道管理員，授予「發送消息」權限
+3. 向頻道發送任意消息
+4. 訪問：`https://api.telegram.org/bot<BOT_TOKEN>/getUpdates`
+5. 在響應JSON中找到頻道ID（負數，格式：`-1001234567890`）
+
+**對於私人聊天：**
+1. 與Bot開始對話，發送任意消息
+2. 訪問：`https://api.telegram.org/bot<BOT_TOKEN>/getUpdates`
+3. 在響應JSON中找到您的用戶ID（正數）
+
+### ⚙️ 環境變數配置
+
+編輯 `.dev.vars` 文件：
 
 ```bash
-# Telegram Bot Token (从 @BotFather 获取)
+# Telegram Bot配置
 BOT_TOKEN="your_bot_token_here"
+CHANNEL_ID="your_target_id_here"
 
-# Telegram频道ID (以-100开头的频道ID)
-CHANNEL_ID="-1001234567890"
+# MCP服務器安全配置（可選但推薦）
+MCP_ACCESS_KEY="your_secure_password_123"
 ```
 
-#### 获取Telegram配置信息
+**說明：**
+- `BOT_TOKEN`: 從@BotFather獲取的Bot令牌
+- `CHANNEL_ID`: 目標頻道ID（負數）或聊天ID（正數）
+- `MCP_ACCESS_KEY`: 自定義的API訪問密鑰（增強安全性）
 
-1. **获取Bot Token:**
-   - 在Telegram中联系 [@BotFather](https://t.me/BotFather)
-   - 发送 `/newbot` 创建新Bot
-   - 按提示设置Bot名称和用户名
-   - 复制获得的Token
+## 🏗️ 本地開發與測試
 
-2. **获取频道ID:**
-   - 将Bot添加为频道管理员
-   - 向频道发送任意消息
-   - 访问 `https://api.telegram.org/bot<BOT_TOKEN>/getUpdates`
-   - 在返回的JSON中找到频道ID（负数，以-100开头）
-
-### 部署到Cloudflare
+### 啟動本地開發服務器
 
 ```bash
-# 本地开发
+# 啟動開發服務器
 pnpm run dev
 
-# 部署到生产环境
-pnpm run deploy
-
-# 设置生产环境变量
-wrangler secret put BOT_TOKEN
-wrangler secret put CHANNEL_ID
+# 服務器將運行在: http://localhost:8787
 ```
 
-## 🔧 与AI助手集成
+### 🧪 測試MCP連接
 
-添加以下配置：
+#### 使用MCP Inspector測試
+
+```bash
+# 新終端窗口
+npx @modelcontextprotocol/inspector@latest
+
+# 瀏覽器將打開: http://localhost:5173
+```
+
+在Inspector中連接到：
+- **無密鑰**: `http://localhost:8787/sse`
+- **有密鑰**: `http://localhost:8787/sse?key=your_secure_password_123`
+
+#### 測試消息發送
+
+在Inspector中使用 `send-sms` 工具：
+
+```json
+{
+  "message": "🧪 測試消息",
+  "parse_mode": "none"
+}
+```
+
+## 🚀 部署到Cloudflare Workers
+
+### 1. 安裝和登錄Wrangler
+
+```bash
+# 安裝Wrangler CLI（如果未安裝）
+npm install -g wrangler
+
+# 登錄Cloudflare帳戶
+wrangler auth login
+```
+
+### 2. 配置項目
+
+檢查 `wrangler.jsonc` 配置：
+
+```jsonc
+{
+  "name": "telegram-channel-mcp",  // 您的Worker名稱
+  "main": "src/index.ts",
+  "compatibility_date": "2025-03-10",
+  "compatibility_flags": ["nodejs_compat"]
+}
+```
+
+### 3. 首次部署
+
+```bash
+# 部署到Cloudflare
+pnpm run deploy
+
+# 或者使用wrangler直接部署
+npx wrangler deploy
+```
+
+部署成功後，您會看到類似的輸出：
+```
+✨ Successfully published your Worker to telegram-channel-mcp.your-account.workers.dev
+```
+
+### 4. 設置生產環境變數
+
+**重要：生產環境必須使用Secrets來保護敏感資訊**
+
+```bash
+# 設置Bot Token
+npx wrangler secret put BOT_TOKEN
+# 輸入您的實際Bot Token
+
+# 設置頻道/聊天ID
+npx wrangler secret put CHANNEL_ID
+# 輸入您的目標ID
+
+# 設置MCP訪問密鑰（強烈推薦）
+npx wrangler secret put MCP_ACCESS_KEY
+# 輸入您的自定義密鑰
+```
+
+### 5. 驗證部署
+
+#### 健康檢查
+
+```bash
+curl "https://telegram-channel-mcp.your-account.workers.dev/health"
+```
+
+預期響應：
+```json
+{
+  "status": "ok",
+  "timestamp": "2024-01-01T00:00:00.000Z",
+  "service": "Telegram Channel MCP Server"
+}
+```
+
+#### 測試MCP連接
+
+```bash
+# 使用MCP Inspector連接到生產環境
+npx @modelcontextprotocol/inspector@latest
+
+# 連接URL: https://telegram-channel-mcp.your-account.workers.dev/sse?key=your_access_key
+```
+
+## 🔧 與AI助手集成
+
+### Claude Desktop配置
+
+創建或編輯 `claude-mcp-config.json`：
 
 ```json
 {
@@ -110,46 +237,82 @@ wrangler secret put CHANNEL_ID
       "command": "npx",
       "args": [
         "mcp-remote",
-        "http://localhost:8787/sse"  // or remote-mcp-server-authless.your-account.workers.dev/sse
+        "https://telegram-channel-mcp.your-account.workers.dev/sse?key=YOUR_ACCESS_KEY_HERE"
       ]
     }
   }
 }
 ```
 
-## 🛠️ 技术栈
+**注意：** 將配置添加到Claude Desktop的設置文件中，而不是項目目錄。
 
-- **运行时**: Cloudflare Workers
-- **开发语言**: TypeScript
+### 其他MCP客戶端
+
+對於支援遠程MCP的客戶端，直接使用：
+- **SSE端點**: `https://your-worker.workers.dev/sse`
+- **JSON-RPC端點**: `https://your-worker.workers.dev/mcp`
+
+## 🔐 安全功能
+
+### API密鑰驗證
+
+如果設置了 `MCP_ACCESS_KEY`，服務器支援多種認證方式：
+
+1. **URL參數**（推薦用於MCP客戶端）:
+   ```
+   https://your-worker.workers.dev/sse?key=your-access-key
+   ```
+
+2. **Authorization Header**:
+   ```bash
+   curl -H "Authorization: Bearer your-access-key" \
+        "https://your-worker.workers.dev/sse"
+   ```
+
+3. **自定義Header**:
+   ```bash
+   curl -H "X-MCP-Key: your-access-key" \
+        "https://your-worker.workers.dev/sse"
+   ```
+
+### 特殊端點
+
+- `/health` - 健康檢查，無需認證
+- `/sse` - MCP SSE端點，需要認證
+- `/mcp` - MCP JSON-RPC端點，需要認證
+
+## 🛠️ 技術棧
+
+- **運行時**: Cloudflare Workers
+- **開發語言**: TypeScript
 - **MCP框架**: @modelcontextprotocol/sdk
 - **Agent框架**: agents
-- **验证库**: Zod
-- **构建工具**: Wrangler
-- **代码规范**: Biome
+- **驗證庫**: Zod
+- **構建工具**: Wrangler
+- **代碼規範**: Biome
 
-## 📁 项目结构
+## 📁 項目結構
 
 ```
 telegram-channel-mcp/
 ├── src/
-│   └── index.ts              # 主要的MCP服务器实现
-├── package.json              # 项目依赖和脚本
-├── wrangler.jsonc           # Cloudflare Workers配置
-├── tsconfig.json            # TypeScript配置
-├── biome.json               # 代码格式化和linting配置
-├── .dev.example.vars        # 环境变量示例
-└── worker-configuration.d.ts # Cloudflare Workers类型定义
+│   └── index.ts                    # 主要的MCP服務器實現
+├── assets/                         # 示例圖片
+├── package.json                    # 項目依賴和腳本
+├── wrangler.jsonc                  # Cloudflare Workers配置
+├── tsconfig.json                   # TypeScript配置
+├── biome.json                      # 代碼格式化和linting配置
+├── .dev.example.vars               # 環境變數示例
+├── claude-mcp-config.example.json  # Claude配置示例
+├── worker-configuration.d.ts       # Cloudflare Workers類型定義
+├── .gitignore                      # Git忽略文件
+├── STATUS.md                       # 項目狀態文檔
+├── DEPLOYMENT.md                   # 詳細部署指南
+├── SECURITY-GUIDE.md               # 安全功能指南
+└── test-guide.md                   # 測試指南
 ```
 
-## 🔍 API端点
-
-### `/sse` 
-Server-Sent Events连接端点，用于与MCP客户端建立实时通信
-
-### `/mcp`
-标准MCP协议端点
-
-## 📝 自定义开发
+## 📝 自定義開發
 
 ### 添加新的MCP工具
 
@@ -159,27 +322,110 @@ Server-Sent Events连接端点，用于与MCP客户端建立实时通信
 this.server.tool(
   "your-tool-name",
   {
-    parameter: z.string(),
+    parameter: z.string().describe("參數描述"),
   },
   async ({ parameter }) => {
-    // 你的工具逻辑
-    return { content: [{ type: "text", text: "结果" }] };
+    // 您的工具邏輯
+    try {
+      const result = await yourCustomLogic(parameter);
+      return { 
+        content: [{ 
+          type: "text", 
+          text: `結果: ${result}` 
+        }] 
+      };
+    } catch (error) {
+      return { 
+        content: [{ 
+          type: "text", 
+          text: `錯誤: ${error.message}` 
+        }] 
+      };
+    }
   },
 );
 ```
 
-### 环境变量管理
+### 環境變數管理
 
-- 开发环境：在 `.dev.vars` 文件中配置
-- 生产环境：使用 `wrangler secret put VARIABLE_NAME` 命令设置
+- **開發環境**: 在 `.dev.vars` 文件中配置
+- **生產環境**: 使用 `wrangler secret put VARIABLE_NAME` 命令設置
+- **類型定義**: 在 `worker-configuration.d.ts` 中定義接口
 
-## 🔒 安全注意事项
+## 🔍 故障排除
 
-1. **保护Bot Token** - 绝不要将Bot Token提交到代码仓库
-2. **验证权限** - 确保Bot具有频道发送消息的权限
-3. **频率限制** - 注意Telegram API的频率限制
-4. **错误处理** - 实现适当的错误处理和重试机制
+### 常見問題
 
-## 🤝 贡献
+1. **Bot Token無效**
+   ```bash
+   # 驗證Token
+   curl "https://api.telegram.org/bot<BOT_TOKEN>/getMe"
+   ```
 
-欢迎提交Issue和Pull Request来改进这个项目！
+2. **頻道權限不足**
+   - 確保Bot被添加為頻道管理員
+   - 檢查Bot是否有「發送消息」權限
+
+3. **MCP連接失敗**
+   - 檢查URL和密鑰是否正確
+   - 確認Worker已正確部署
+
+4. **部署失敗**
+   ```bash
+   # 檢查Worker日誌
+   npx wrangler tail
+   ```
+
+### 調試命令
+
+```bash
+# 查看部署狀態
+npx wrangler status
+
+# 查看環境變數（不顯示值）
+npx wrangler secret list
+
+# 查看實時日誌
+npx wrangler tail
+
+# 重新部署
+npx wrangler deploy --force
+```
+
+## 🔒 安全注意事項
+
+1. **保護機密資訊**
+   - 絕不要將Bot Token提交到代碼庫
+   - 使用Wrangler Secrets管理敏感資訊
+   - 設置強密碼作為MCP訪問密鑰
+
+2. **權限最小化**
+   - Bot只授予必要的頻道權限
+   - 定期輪換API密鑰
+
+3. **監控和日誌**
+   - 定期檢查Worker日誌
+   - 監控異常訪問模式
+
+## 📖 進階資源
+
+- [詳細部署指南](./DEPLOYMENT.md)
+- [安全功能指南](./SECURITY-GUIDE.md)
+- [測試指南](./test-guide.md)
+- [項目狀態](./STATUS.md)
+
+## 🤝 貢獻
+
+歡迎提交Issue和Pull Request來改進這個項目！
+
+### 開發流程
+
+1. Fork 項目
+2. 創建功能分支 (`git checkout -b feature/amazing-feature`)
+3. 提交更改 (`git commit -m 'Add amazing feature'`)
+4. 推送到分支 (`git push origin feature/amazing-feature`)
+5. 開啟Pull Request
+
+## 📄 許可證
+
+本項目採用 MIT 許可證 - 查看 [LICENSE](LICENSE) 文件了解詳情。

@@ -1,7 +1,15 @@
 {
 	"name": "telegram-channel-mcp",
 	"version": "0.0.1",
-	"private": true,
+	"license": "MIT",
+	"author": "Your Name <your.email@example.com>",
+	"description": "A Model Context Protocol (MCP) server for Telegram channel integration on Cloudflare Workers",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/your-username/telegram-channel-mcp.git"
+	},
+	"keywords": ["mcp", "telegram", "cloudflare-workers", "claude", "ai-assistant"],
+	"private": false,
 	"scripts": {
 		"deploy": "wrangler deploy",
 		"dev": "wrangler dev",

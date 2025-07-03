@@ -170,3 +170,6 @@ dist
 
 .dev.vars
 .wrangler/
+
+# Claude MCP configuration with sensitive keys
+claude-mcp-config.json
